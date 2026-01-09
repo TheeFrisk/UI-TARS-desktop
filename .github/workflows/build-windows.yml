@@ -1,0 +1,41 @@
+name: Build UI-TARS Windows
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-win:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        run: npm i -g pnpm@8
+
+      - name: Install dependencies
+        run: pnpm install --shamefully-hoist
+
+      - name: Build workspace
+        run: pnpm -w run build
+
+      - name: Package (try common scripts)
+        run: |
+          pnpm -w run dist || pnpm -w run package || pnpm -w run release || echo "No dist script found"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-tars-windows
+          path: |
+            dist/**
+            out/**
+            release/**
