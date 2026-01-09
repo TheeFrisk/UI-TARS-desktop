@@ -8,6 +8,7 @@ on:
 jobs:
   build-win:
     runs-on: windows-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,10 +17,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
 
       - name: Setup pnpm
-        run: npm i -g pnpm@8
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Verify pnpm
+        run: pnpm --version
 
       - name: Install dependencies
         run: pnpm install --shamefully-hoist
@@ -29,7 +34,7 @@ jobs:
 
       - name: Package (try common scripts)
         run: |
-          pnpm -w run dist || pnpm -w run package || pnpm -w run release || echo "No dist script found"
+          pnpm -w run dist || pnpm -w run package || pnpm -w run release
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -39,3 +44,4 @@ jobs:
             dist/**
             out/**
             release/**
+
